@@ -1,10 +1,12 @@
 package main
 
 import (
-	"wasm.go/binary"
 	"flag"
 	"fmt"
 	"os"
+
+	"wasm.go/binary"
+	"wasm.go/interpreter"
 )
 
 func main() {
@@ -23,5 +25,7 @@ func main() {
 
 	if *dumpFlag {
 		dump(module)
+	} else {
+		interpreter.ExecMainFunc(module)
 	}
 }
