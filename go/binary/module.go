@@ -138,3 +138,12 @@ func (module Module) GetBlockType(bt BlockType) FuncType {
 		return module.TypeSec[bt]
 	}
 }
+
+
+func (code Code) GetLocalCount() uint64 {
+	n := uint64(0)
+	for _, locals := range code.Locals {
+		n += uint64(locals.N)
+	}
+	return n
+}
