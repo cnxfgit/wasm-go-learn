@@ -55,9 +55,68 @@ func callInternalFunc(vm *vm, idx int) {
 	}
 }
 
-// hack!
 func brIf(vm *vm, args interface{}) {
 	if vm.popBool() {
-		vm.exitBlock()
+		br(vm, args)
 	}
+}
+
+func block(vm *vm, args interface{}) {
+	blockArgs := args.(binary.BlockArgs)
+	bt := vm.module.GetBlockType(blockArgs.BT)
+	vm.enterBlock(binary.Block, bt, blockArgs.Instrs)
+}
+
+func loop(vm *vm, args interface{}) {
+	blockArgs := args.(binary.BlockArgs)
+	bt := vm.module.GetBlockType(blockArgs.BT)
+	vm.enterBlock(binary.Loop, bt, blockArgs.Instrs)
+}
+
+func _if(vm *vm, args interface{}) {
+	ifArgs := args.(binary.IfArgs)
+	bt := vm.module.GetBlockType(ifArgs.BT)
+
+	if vm.popBool() {
+		vm.enterBlock(binary.If, bt, ifArgs.Instrs1)
+	} else {
+		vm.enterBlock(binary.If, bt, ifArgs.Instrs2)
+	}
+}
+
+func br(vm *vm, args interface{}) {
+	labelIdx := int(args.(uint32))
+	for i := 0; i < labelIdx; i++ {
+		vm.popControlFrame()
+	}
+	if cf := vm.topControlFrame(); cf.opcode != binary.Loop {
+		vm.exitBlock()
+	} else {
+		vm.resetBlock(cf)
+		cf.pc = 0
+	}
+}
+
+
+func brTable(vm *vm, args interface{}) {
+	brTableArgs := args.(binary.BrTableArgs)
+	n := int(vm.popU32())
+	if n < len(brTableArgs.Labels) {
+		br(vm, brTableArgs.Labels[n])
+	} else {
+		br(vm, brTableArgs.Default)
+	}
+}
+
+func _return(vm *vm, _ interface{}) {
+	_, labelIdx := vm.topCallFrame()
+	br(vm, uint32(labelIdx))
+}
+
+func unreachable(vm *vm, _ interface{}) {
+	panic(errTrap)
+}
+
+func nop(vm *vm, _ interface{}) {
+	// do nothing
 }

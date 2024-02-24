@@ -33,3 +33,7 @@ type BrTableArgs struct {
 	Labels  []LabelIdx
 	Default LabelIdx
 }
+
+func (instr Instruction) String() string {
+	return opnames[instr.Opcode]
+}

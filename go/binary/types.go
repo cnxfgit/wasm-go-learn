@@ -1,6 +1,9 @@
 package binary
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
+)
 
 type ValType = byte
 
@@ -61,4 +64,24 @@ func ValTypeToStr(vt ValType) string {
 	default:
 		panic(fmt.Errorf("invalid valtype: %d", vt))
 	}
+}
+
+func (ft FuncType) GetSignature() string {
+	sb := strings.Builder{}
+	sb.WriteString("(")
+	for i, vt := range ft.ParamTypes {
+		if i > 0 {
+			sb.WriteString(",")
+		}
+		sb.WriteString(ValTypeToStr(vt))
+	}
+	sb.WriteString(")->(")
+	for i, vt := range ft.ResultTypes {
+		if i > 0 {
+			sb.WriteString(",")
+		}
+		sb.WriteString(ValTypeToStr(vt))
+	}
+	sb.WriteString(")")
+	return sb.String()
 }

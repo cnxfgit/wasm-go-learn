@@ -114,3 +114,60 @@ func i64Store32(vm *vm, memArg interface{}) {
 	val := vm.popU64()
 	writeU32(vm, memArg, uint32(val))
 }
+
+func i32Load(vm *vm, memArg interface{}) {
+	val := readU32(vm, memArg)
+	vm.pushU32(val)
+}
+func i64Load(vm *vm, memArg interface{}) {
+	val := readU64(vm, memArg)
+	vm.pushU64(val)
+}
+func f32Load(vm *vm, memArg interface{}) {
+	val := readU32(vm, memArg)
+	vm.pushU32(val)
+}
+func f64Load(vm *vm, memArg interface{}) {
+	val := readU64(vm, memArg)
+	vm.pushU64(val)
+}
+func i32Load8S(vm *vm, memArg interface{}) {
+	val := readU8(vm, memArg)
+	vm.pushS32(int32(int8(val)))
+}
+func i32Load8U(vm *vm, memArg interface{}) {
+	val := readU8(vm, memArg)
+	vm.pushU32(uint32(val))
+}
+func i32Load16S(vm *vm, memArg interface{}) {
+	val := readU16(vm, memArg)
+	vm.pushS32(int32(int16(val)))
+}
+func i32Load16U(vm *vm, memArg interface{}) {
+	val := readU16(vm, memArg)
+	vm.pushU32(uint32(val))
+}
+func i64Load8S(vm *vm, memArg interface{}) {
+	val := readU8(vm, memArg)
+	vm.pushS64(int64(int8(val)))
+}
+func i64Load8U(vm *vm, memArg interface{}) {
+	val := readU8(vm, memArg)
+	vm.pushU64(uint64(val))
+}
+func i64Load16S(vm *vm, memArg interface{}) {
+	val := readU16(vm, memArg)
+	vm.pushS64(int64(int16(val)))
+}
+func i64Load16U(vm *vm, memArg interface{}) {
+	val := readU16(vm, memArg)
+	vm.pushU64(uint64(val))
+}
+func i64Load32S(vm *vm, memArg interface{}) {
+	val := readU32(vm, memArg)
+	vm.pushS64(int64(int32(val)))
+}
+func i64Load32U(vm *vm, memArg interface{}) {
+	val := readU32(vm, memArg)
+	vm.pushU64(uint64(val))
+}
