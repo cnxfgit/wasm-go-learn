@@ -11,6 +11,8 @@ type vm struct {
 	memory    *memory
 	globals   []*globalVar
 	local0Idx uint32
+	funcs     []vmFunc
+	table     *table
 }
 
 func (vm *vm) loop() {
@@ -35,8 +37,39 @@ func ExecMainFunc(module binary.Module) {
 	vm := &vm{module: module}
 	vm.initMem()
 	vm.initGlobals()
-	call(vm, *module.StartSec)
+	vm.initFuncs()
+	vm.initTable()
+	if module.StartSec != nil {
+		call(vm, *module.StartSec)
+	} else {
+		call(vm, getMainFuncIdx(module))
+	}
 	vm.loop()
+}
+
+func (vm *vm) initTable() {
+	if len(vm.module.TableSec) > 0 {
+		vm.table = newTable(vm.module.TableSec[0])
+	}
+	for _, elem := range vm.module.ElemSec {
+		for _, instr := range elem.Offset {
+			vm.execInstr(instr)
+		}
+		offset := vm.popU32()
+		for i, funcIdx := range elem.Init {
+			vm.table.SetElem(offset+uint32(i), vm.funcs[funcIdx])
+		}
+	}
+}
+
+
+func getMainFuncIdx(module binary.Module) uint32 {
+	for _, exp := range module.ExportSec {
+		if exp.Desc.Tag == binary.ImportTagFunc && exp.Name == "main" {
+			return exp.Desc.Idx
+		}
+	}
+	panic("main func not found")
 }
 
 func (vm *vm) initGlobals() {
@@ -90,4 +123,39 @@ func (vm *vm) resetBlock(cf *controlFrame) {
 	results := vm.popU64s(len(cf.bt.ParamTypes))
 	vm.popU64s(vm.stackSize() - cf.bp)
 	vm.pushU64s(results)
+}
+
+func (vm *vm) initFuncs() {
+	vm.linkNativeFuncs()
+	for i, ftIdx := range vm.module.FuncSec {
+		ft := vm.module.TypeSec[ftIdx]
+		code := vm.module.CodeSec[i]
+		vm.funcs = append(vm.funcs, newInternalFunc(ft, code))
+	}
+}
+
+func (vm *vm) linkNativeFuncs() {
+	for _, imp := range vm.module.ImportSec {
+		if imp.Desc.Tag == binary.ImportTagFunc && imp.Module == "env" {
+			ft := vm.module.TypeSec[imp.Desc.FuncType]
+			switch imp.Name {
+			case "print_char":
+				vm.funcs = append(vm.funcs, newExternalFunc(ft, printChar))
+			case "assert_true":
+				vm.funcs = append(vm.funcs, newExternalFunc(ft, assertTrue))
+			case "assert_false":
+				vm.funcs = append(vm.funcs, newExternalFunc(ft, assertFalse))
+			case "assert_eq_i32":
+				vm.funcs = append(vm.funcs, newExternalFunc(ft, assertEqI32))
+			case "assert_eq_i64":
+				vm.funcs = append(vm.funcs, newExternalFunc(ft, assertEqI64))
+			case "assert_eq_f32":
+				vm.funcs = append(vm.funcs, newExternalFunc(ft, assertEqF32))
+			case "assert_eq_f64":
+				vm.funcs = append(vm.funcs, newExternalFunc(ft, assertEqF64))
+			default:
+				panic("TODO")
+			}
+		}
+	}
 }

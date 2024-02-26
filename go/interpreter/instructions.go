@@ -6,6 +6,7 @@ type instrFn = func(vm *vm, args interface{})
 
 var instrTable = make([]instrFn, 256)
 
+
 func init() {
 	instrTable[binary.Unreachable] = unreachable
 	instrTable[binary.Nop] = nop
@@ -17,6 +18,7 @@ func init() {
 	instrTable[binary.BrTable] = brTable
 	instrTable[binary.Return] = _return
 	instrTable[binary.Call] = call
+	instrTable[binary.CallIndirect] = callIndirect
 	instrTable[binary.Drop] = drop
 	instrTable[binary.Select] = _select
 	instrTable[binary.LocalGet] = localGet
