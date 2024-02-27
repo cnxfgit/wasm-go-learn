@@ -6,11 +6,6 @@ const (
 )
 
 const (
-	PageSize     = 65536 // 64KB
-	MaxPageCount = 65536 // 2 ^ 16
-)
-
-const (
 	SecCustomID = iota
 	SecTypeID
 	SecImportID
@@ -39,6 +34,12 @@ const (
 	ExportTagGlobal = 3
 )
 
+const (
+	PageSize     = 65536 // 64KB
+	MaxPageCount = 65536 // 2 ^ 16
+)
+
+
 type (
 	TypeIdx   = uint32 // 类型索引 类型段
 	FuncIdx   = uint32 // 函数索引 导入段(内部函数) 代码段(外部函数)
@@ -65,6 +66,12 @@ type Module struct {
 	CodeSec    []Code
 	DataSec    []Data
 }
+
+type CustomSec struct {
+	Name  string
+	Bytes []byte
+}
+
 
 type Import struct {
 	Module string
@@ -117,10 +124,7 @@ type Data struct {
 	Init   []byte
 }
 
-type CustomSec struct {
-	Name  string
-	Bytes []byte
-}
+
 
 func (module Module) GetBlockType(bt BlockType) FuncType {
 	switch bt {

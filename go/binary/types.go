@@ -5,8 +5,6 @@ import (
 	"strings"
 )
 
-type ValType = byte
-
 const (
 	ValTypeI32 ValType = 0x7F // i32
 	ValTypeI64 ValType = 0x7E // i64
@@ -26,22 +24,18 @@ const (
 	MutVar   byte = 1
 )
 
+type ValType = byte
+type BlockType = int32
+type MemType = Limits
+
 type FuncType struct {
 	Tag         byte
 	ParamTypes  []ValType
 	ResultTypes []ValType
 }
 
-type Limits struct {
-	Tag byte
-	Min uint32
-	Max uint32
-}
-
-type MemType = Limits
-
 type TableType struct {
-	ElemType byte // 目前只能是 0x70
+	ElemType byte
 	Limits   Limits
 }
 
@@ -50,6 +44,11 @@ type GlobalType struct {
 	Mut     byte
 }
 
+type Limits struct {
+	Tag byte
+	Min uint32
+	Max uint32
+}
 
 func ValTypeToStr(vt ValType) string {
 	switch vt {
@@ -66,6 +65,28 @@ func ValTypeToStr(vt ValType) string {
 	}
 }
 
+func (ft FuncType) Equal(ft2 FuncType) bool {
+	//return reflect.DeepEqual(ft, ft2)
+	if len(ft.ParamTypes) != len(ft2.ParamTypes) {
+		return false
+	}
+	if len(ft.ResultTypes) != len(ft2.ResultTypes) {
+		return false
+	}
+	for i, vt := range ft.ParamTypes {
+		if vt != ft2.ParamTypes[i] {
+			return false
+		}
+	}
+	for i, vt := range ft.ResultTypes {
+		if vt != ft2.ResultTypes[i] {
+			return false
+		}
+	}
+	return true
+}
+
+// (i32,i32)->(i32)
 func (ft FuncType) GetSignature() string {
 	sb := strings.Builder{}
 	sb.WriteString("(")
@@ -84,4 +105,18 @@ func (ft FuncType) GetSignature() string {
 	}
 	sb.WriteString(")")
 	return sb.String()
+}
+
+func (ft FuncType) String() string {
+	return ft.GetSignature()
+}
+
+func (gt GlobalType) String() string {
+	return fmt.Sprintf("{type: %s, mut: %d}",
+		ValTypeToStr(gt.ValType), gt.Mut)
+}
+
+func (limits Limits) String() string {
+	return fmt.Sprintf("{min: %d, max: %d}",
+		limits.Min, limits.Max)
 }

@@ -7,17 +7,7 @@ type Instruction struct {
 	Args   interface{}
 }
 
-func (instr Instruction) GetOpname() string {
-	return opnames[instr.Opcode]
-}
-
-type MemArg struct {
-	Align  uint32
-	Offset uint32
-}
-
-type BlockType = int32
-
+// block & loop
 type BlockArgs struct {
 	BT     BlockType
 	Instrs []Instruction
@@ -32,6 +22,15 @@ type IfArgs struct {
 type BrTableArgs struct {
 	Labels  []LabelIdx
 	Default LabelIdx
+}
+
+type MemArg struct {
+	Align  uint32
+	Offset uint32
+}
+
+func (instr Instruction) GetOpname() string {
+	return opnames[instr.Opcode]
 }
 
 func (instr Instruction) String() string {
