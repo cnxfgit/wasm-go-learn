@@ -5,6 +5,7 @@ import (
 
 	"wasm.go/binary"
 	"wasm.go/instance"
+	"wasm.go/validator"
 )
 
 type vm struct {
@@ -19,6 +20,10 @@ type vm struct {
 }
 
 func New(m binary.Module, mm map[string]instance.Module) (inst instance.Module, err error) {
+	if err := validator.Validate(m); err != nil {
+		return nil, err
+	}
+	
 	defer func() {
 		if _err := recover(); _err != nil {
 			switch x := _err.(type) {
