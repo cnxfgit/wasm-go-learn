@@ -1,10 +1,18 @@
 package interpreter
 
-import "wasm.go/binary"
+import (
+	"wasm.go/binary"
+	"wasm.go/instance"
+)
 
 type memory struct {
 	_type binary.MemType
 	data  []byte
+}
+
+func NewMemory(min, max uint32) instance.Memory {
+	mt := binary.MemType{Min: min, Max: max}
+	return newMemory(mt)
 }
 
 func newMemory(mt binary.MemType) *memory {
